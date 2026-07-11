@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qravixo — QR Code Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F3EA;
+    --paper-dim:#EFE9DB;
+    --ink:#17181A;
+    --ink-soft:#4B4C4F;
+    --line: rgba(23,24,26,0.14);
+    --cobalt:#2547E0;
+    --brass:#B8863B;
+    --mint:#2FA88C;
+    --signal:#D5432B;
+    --card:#FFFFFF;
+    --radius: 10px;
+    --shadow: 0 1px 0 rgba(23,24,26,0.06), 0 8px 24px rgba(23,24,26,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(23,24,26,0.06) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+  .wrap{ max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header.top{
+    display:flex; justify-content:space-between; align-items:flex-end; gap:20px;
+    padding-bottom:22px; margin-bottom:22px; border-bottom: 1.5px solid var(--ink);
+    flex-wrap:wrap;
+  }
+  .wordmark{
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 30px;
+    letter-spacing: -0.02em; display:flex; align-items:center; gap:10px;
+  }
+  .wordmark .mark{
+    width:28px;height:28px; border:2.5px solid var(--ink); border-radius:4px; position:relative; flex:none;
+    display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); padding:3px; gap:2px;
+  }
+  .wordmark .mark i{ background:var(--ink); border-radius:1px; }
+  .wordmark .mark i:nth-child(2),.wordmark .mark i:nth-child(4),.wordmark .mark i:nth-child(6),.wordmark .mark i:nth-child(8){ background:transparent; }
+  .tagline{ font-size:13px; color:var(--ink-soft); margin-top:4px; font-family:'IBM Plex Mono',monospace; }
+  .badges{ display:flex; gap:8px; flex-wrap:wrap; }
+  .badge{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.02em;
+    border:1.3px solid var(--ink); border-radius:999px; padding:6px 12px; white-space:nowrap;
+  }
+  .badge.fill{ background:var(--ink); color:var(--paper); }
+
+  main.grid{ display:grid; grid-template-columns: 1.05fr 1fr; gap:22px; align-items:start; }
+  @media (max-width: 900px){ main.grid{ grid-template-columns: 1fr; } }
+
+  .panel{
+    background:var(--card); border:1.3px solid var(--ink); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding:20px; position:relative;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:14px; display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow::after{ content:''; flex:1; height:1px; background:var(--line); }
+
+  .type-grid{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:18px;
+  }
+  @media (max-width:560px){ .type-grid{ grid-template-columns: repeat(3, 1fr); } }
+  .type-btn{
+    display:flex; flex-direction:column; align-items:center; gap:6px; justify-content:center;
+    border:1.3px solid var(--line); border-radius:8px; background:var(--paper); padding:11px 4px;
+    cursor:pointer; font-family:'Inter'; font-size:10.5px; font-weight:600; color:var(--ink-soft);
+    transition: border-color .12s ease, color .12s ease, background .12s ease, transform .08s ease;
+  }
+  .type-btn svg{ width:19px; height:19px; stroke:var(--ink-soft); fill:none; stroke-width:1.6; }
+  .type-btn:hover{ border-color:var(--ink); color:var(--ink); transform: translateY(-1px); }
+  .type-btn.active{ border-color:var(--ink); background:var(--ink); color:var(--paper); }
+  .type-btn.active svg{ stroke:var(--paper); }
+
+  .form-area{ display:flex; flex-direction:column; gap:12px; }
+  .field label{ display:block; font-size:11.5px; font-weight:600; margin-bottom:5px; color:var(--ink); }
+  .field .hint{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
+  .field input[type=text], .field input[type=url], .field input[type=tel], .field input[type=email],
+  .field input[type=password], .field textarea, .field select{
+    width:100%; border:1.3px solid var(--line); border-radius:7px; padding:9px 10px; font-size:13.5px;
+    font-family:'Inter'; background:var(--paper); color:var(--ink); outline:none;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus{ border-color:var(--cobalt); }
+  .field textarea{ resize:vertical; min-height:64px; }
+  .field-row{ display:flex; gap:10px; }
+  .field-row .field{ flex:1; }
+  .checkline{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-soft); }
+  .list-rows{ display:flex; flex-direction:column; gap:8px; }
+  .list-row{ display:flex; gap:8px; align-items:flex-start; }
+  .list-row .field{ flex:1; }
+  .row-remove{
+    border:1.3px solid var(--line); background:var(--card); border-radius:6px; width:32px; height:32px;
+    flex:none; cursor:pointer; color:var(--signal); font-size:16px; line-height:1; margin-top:2px;
+  }
+  .add-row{
+    border:1.3px dashed var(--ink-soft); background:transparent; border-radius:7px; padding:8px;
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; cursor:pointer; color:var(--ink-soft);
+  }
+  .add-row:hover{ color:var(--ink); border-color:var(--ink); }
+
+  .proof-frame{
+    position:relative; border:1.3px solid var(--ink); border-radius:8px; background:
+      repeating-linear-gradient(45deg, rgba(23,24,26,0.025) 0 10px, transparent 10px 20px);
+    padding:26px 18px 18px; display:flex; flex-direction:column; align-items:center; gap:10px;
+    margin-bottom:16px;
+  }
+  .reg-mark{ position:absolute; width:16px; height:16px; color:var(--ink-soft); opacity:.55; }
+  .reg-mark::before, .reg-mark::after{ content:''; position:absolute; background:currentColor; }
+  .reg-mark::before{ top:50%; left:0; right:0; height:1.3px; transform:translateY(-50%); }
+  .reg-mark::after{ left:50%; top:0; bottom:0; width:1.3px; transform:translateX(-50%); }
+  .reg-mark.tl{ top:8px; left:8px; } .reg-mark.tr{ top:8px; right:8px; }
+  .reg-mark.bl{ bottom:8px; left:8px; } .reg-mark.br{ bottom:8px; right:8px; }
+  .plate-meta{
+    width:100%; display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px; color:var(--ink-soft); letter-spacing:.03em;
+  }
+  .qr-container{ width:230px; height:230px; display:flex; align-items:center; justify-content:center; }
+  .qr-container canvas, .qr-container img, .qr-container svg{ max-width:100%; max-height:100%; }
+  .qr-empty{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); text-align:center; padding:0 20px; }
+
+  @keyframes qrPop{
+    from{ opacity:0; transform: scale(.94); }
+    to{ opacity:1; transform: scale(1); }
+  }
+  .qr-pop{ animation: qrPop .32s cubic-bezier(.16,1,.3,1); transform-origin:center center; }
+  @media (prefers-reduced-motion: reduce){ .qr-pop{ animation:none; } }
+
+  .capacity-meter{ margin-bottom:16px; }
+  .capacity-track{ height:6px; border-radius:99px; background:var(--paper-dim); overflow:hidden; border:1px solid var(--line); }
+  .capacity-fill{ height:100%; background:var(--mint); width:0%; transition: width .2s ease, background .2s ease; }
+  .capacity-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-top:5px; display:flex; justify-content:space-between; }
+
+  .themes-row{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-bottom:14px; }
+  @media (max-width:560px){ .themes-row{ grid-template-columns: repeat(3,1fr); } }
+  .theme-swatch{
+    border:1.3px solid var(--line); border-radius:8px; padding:8px 6px; cursor:pointer; text-align:center;
+    font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); background:var(--paper);
+    transition: border-color .12s ease, color .12s ease;
+  }
+  .theme-swatch .dot{ width:24px; height:24px; border-radius:6px; margin:0 auto 6px; border:1px solid var(--line); }
+  .theme-swatch.active{ border-color:var(--ink); color:var(--ink); }
+  .theme-swatch:hover{ border-color:var(--ink); }
+
+  details.style-controls{ border:1.3px solid var(--line); border-radius:8px; margin-bottom:14px; }
+  details.style-controls summary{
+    cursor:pointer; padding:11px 12px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); list-style:none;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  details.style-controls summary::-webkit-details-marker{ display:none; }
+  details.style-controls summary::after{ content:'+'; font-size:15px; }
+  details.style-controls[open] summary::after{ content:'–'; }
+  .controls-body{ padding:4px 12px 14px; display:flex; flex-direction:column; gap:12px; }
+  .controls-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .color-field{ display:flex; align-items:center; gap:8px; }
+  .color-field input[type=color]{ width:34px; height:30px; border:1.3px solid var(--line); border-radius:6px; padding:0; background:none; cursor:pointer; }
+  .slider-field{ display:flex; align-items:center; gap:10px; }
+  .slider-field input[type=range]{ flex:1; }
+  .slider-field .val{ font-family:'IBM Plex Mono',monospace; font-size:11px; width:38px; text-align:right; }
+
+  .download-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .dl-btn{
+    flex:1; min-width:90px; border:1.3px solid var(--ink); border-radius:7px; background:var(--ink); color:var(--paper);
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:11px 8px; cursor:pointer; letter-spacing:.03em;
+  }
+  .dl-btn.ghost{ background:transparent; color:var(--ink); }
+  .dl-btn:hover{ opacity:.85; }
+
+  footer.small-print{
+    margin-top:26px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <div class="wordmark"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>QRAVIXO</div>
+      <div class="tagline">Unlimited QR codes, cut to your own plate — no account, no scan caps, no watermark.</div>
+    </div>
+    <div class="badges">
+      <span class="badge fill">UNLIMITED GENERATIONS</span>
+      <span class="badge">NO LOGIN</span>
+      <span class="badge">NO EXPIRING LINKS</span>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="panel">
+      <div class="eyebrow">01 — Choose a format</div>
+      <div class="type-grid" id="typeGrid"></div>
+      <div class="form-area" id="formArea"></div>
+    </section>
+
+    <section class="panel">
+      <div class="eyebrow">02 — Proof</div>
+      <div class="proof-frame">
+        <span class="reg-mark tl"></span><span class="reg-mark tr"></span><span class="reg-mark bl"></span><span class="reg-mark br"></span>
+        <div class="plate-meta"><span id="plateNo">PLATE NO. 000001</span><span id="plateType">WEBSITE</span></div>
+        <div class="qr-container" id="qrContainer"><div class="qr-empty">Fill in the form to cut your first plate.</div></div>
+      </div>
+
+      <div class="capacity-meter">
+        <div class="capacity-track"><div class="capacity-fill" id="capFill"></div></div>
+        <div class="capacity-label"><span id="capText">0 bytes used</span><span id="capPct">0%</span></div>
+      </div>
+
+      <div class="eyebrow">03 — Theme</div>
+      <div class="themes-row" id="themeRow"></div>
+
+      <details class="style-controls">
+        <summary>Fine‑tune style</summary>
+        <div class="controls-body">
+          <div class="controls-grid">
+            <div class="field">
+              <label>Dot style</label>
+              <select id="dotStyle">
+                <option value="square">Square</option>
+                <option value="rounded">Rounded</option>
+                <option value="dots">Dots</option>
+                <option value="classy">Classy</option>
+                <option value="classy-rounded">Classy rounded</option>
+                <option value="extra-rounded">Extra rounded</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Corner style</label>
+              <select id="cornerStyle">
+                <option value="square">Square</option>
+                <option value="dot">Dot</option>
+                <option value="extra-rounded">Extra rounded</option>
+              </select>
+            </div>
+          </div>
+          <div class="controls-grid">
+            <div class="field"><label>Foreground</label>
+              <div class="color-field"><input type="color" id="fgColor" value="#17181A"><span id="fgHex" style="font-family:'IBM Plex Mono',monospace;font-size:11px;">#17181A</span></div>
+            </div>
+            <div class="field"><label>Background</label>
+              <div class="color-field"><input type="color" id="bgColor" value="#F7F3EA"><span id="bgHex" style="font-family:'IBM Plex Mono',monospace;font-size:11px;">#F7F3EA</span></div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="checkline"><input type="checkbox" id="gradientToggle"> Use gradient foreground</label>
+          </div>
+          <div class="field" id="gradientColorWrap" style="display:none;">
+            <label>Gradient second color</label>
+            <div class="color-field"><input type="color" id="fgColor2" value="#2547E0"><span id="fgHex2" style="font-family:'IBM Plex Mono',monospace;font-size:11px;">#2547E0</span></div>
+          </div>
+          <div class="field">
+            <label>Error correction</label>
+            <select id="eccLevel">
+              <option value="L">L — light (up to ~7% damage)</option>
+              <option value="M" selected>M — standard (~15%)</option>
+              <option value="Q">Q — sturdy (~25%)</option>
+              <option value="H">H — heavy‑duty (~30%)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Size — <span id="sizeVal">720</span>px export</label>
+            <div class="slider-field"><input type="range" id="sizeSlider" min="240" max="1200" step="20" value="720"></div>
+          </div>
+        </div>
+      </details>
+
+      <div class="download-row">
+        <button class="dl-btn" id="dlPng">Download PNG</button>
+        <button class="dl-btn ghost" id="dlSvg">Download SVG</button>
+        <button class="dl-btn ghost" id="dlJpg">Download JPG</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="small-print" style="text-align:center;">
+    🛡️ <strong>© 2026 QRAVIXO.</strong> All Rights Reserved.<br>
+    ❤️ Designed &amp; Developed by <strong>Lasin</strong> • 2026<br>
+    🚫 Unauthorized copying, modification, redistribution, or commercial use is prohibited.<br>
+    ✨ Thanks for using <strong>QRAVIXO</strong>!
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  function esc(s){ return (s||"").toString(); }
+  function attrEsc(s){ return esc(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function utf8ByteLength(str){ return new Blob([str]).size; }
+  function digitsOnly(s){ return (s||"").replace(/[^\d+]/g,"").replace(/(?!^)\+/g,""); }
+  function ensureProtocol(url){
+    if(!url) return "";
+    if(/^https?:\/\//i.test(url) || /^mailto:|^tel:|^sms:|^data:|^smsto:/i.test(url)) return url;
+    return "https://" + url;
+  }
+  function textBlock(lines){
+    return lines.filter(function(l){ return l !== null && l !== undefined && l !== ""; }).join("\n");
+  }
+
+  var ICONS = {
+    website:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>',
+    text:'<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg>',
+    wifi:'<svg viewBox="0 0 24 24"><path d="M2 8.5a16 16 0 0 1 20 0M5.5 12a11 11 0 0 1 13 0M9 15.5a6 6 0 0 1 6 0"/><circle cx="12" cy="19" r="1"/></svg>',
+    vcard:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c0-1.7 1.3-3 3-3s3 1.3 3 3M14 10h5M14 14h5"/></svg>',
+    business:'<svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg>',
+    video:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="1.5"/><path d="M16 10l5-3v10l-5-3"/></svg>',
+    images:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5.5-5.5L4 21"/></svg>',
+    facebook:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14 8.5h-1.5A1.5 1.5 0 0 0 11 10v2M9 12h5M12.5 12v6.5"/></svg>',
+    instagram:'<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r="0.8" fill="currentColor"/></svg>',
+    social:'<svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.3"/><circle cx="18" cy="6" r="2.3"/><circle cx="18" cy="18" r="2.3"/><path d="M8 11l8-4M8 13l8 4"/></svg>',
+    whatsapp:'<svg viewBox="0 0 24 24"><path d="M4 20l1.3-4A8 8 0 1 1 9 19l-5 1z"/><path d="M8.5 9.5c0 3 2 5 5 5"/></svg>',
+    mp3:'<svg viewBox="0 0 24 24"><path d="M4 15V9M9 18V6M14 15V9M19 12V4"/></svg>',
+    apps:'<svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2"/><path d="M11 18h2"/></svg>',
+    menu:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+    coupon:'<svg viewBox="0 0 24 24"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4z"/><path d="M10 7v10" stroke-dasharray="2 2"/></svg>',
+    email:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 7l8 6 8-6"/></svg>',
+    phone:'<svg viewBox="0 0 24 24"><path d="M6 3h3l1.5 5-2.5 1.5a12 12 0 0 0 5.5 5.5L15 12.5l5 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 6.2 2 2 0 0 1 6 3z"/></svg>',
+    sms:'<svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>'
+  };
+
+  function vcardData(f){
+    return "BEGIN:VCARD\nVERSION:3.0\nN:" + esc(f.lastName) + ";" + esc(f.firstName) + "\nFN:" + esc(f.firstName) + " " + esc(f.lastName)
+      + (f.org?("\nORG:" + esc(f.org)):"") + (f.title?("\nTITLE:" + esc(f.title)):"")
+      + (f.phone?("\nTEL;TYPE=CELL:" + esc(f.phone)):"") + (f.email?("\nEMAIL:" + esc(f.email)):"")
+      + (f.website?("\nURL:" + ensureProtocol(f.website)):"") + (f.address?("\nADR;TYPE=WORK:;;" + esc(f.address).replace(/,/g,";")):"")
+      + "\nEND:VCARD";
+  }
+
+  var TYPES = [
+    { id:"website", label:"Website", icon:ICONS.website,
+      fields:[ {key:"url", label:"Web address", type:"url", placeholder:"yourbrand.com/page"} ],
+      build:function(f){ return ensureProtocol(f.url); } },
+
+    { id:"text", label:"Text", icon:ICONS.text,
+      fields:[ {key:"content", label:"Message", type:"textarea", placeholder:"Anything you want to show when this is scanned."} ],
+      build:function(f){ return f.content||""; } },
+
+    { id:"wifi", label:"WiFi", icon:ICONS.wifi,
+      fields:[
+        {key:"ssid", label:"Network name (SSID)", type:"text", placeholder:"Studio-Guest"},
+        {key:"password", label:"Password", type:"text", placeholder:"leave blank if open"},
+        {key:"encryption", label:"Security", type:"select", options:[["WPA","WPA / WPA2"],["WEP","WEP"],["nopass","None — open network"]]},
+      ],
+      build:function(f){
+        var enc = f.encryption || "WPA";
+        var esc2 = function(v){ return (v||"").replace(/([\\;,:"])/g,"\\$1"); };
+        return "WIFI:T:" + enc + ";S:" + esc2(f.ssid) + ";" + (enc==="nopass"?"":"P:" + esc2(f.password) + ";") + ";";
+      } },
+
+    { id:"vcard", label:"vCard", icon:ICONS.vcard,
+      fields:[
+        {key:"firstName", label:"First name", type:"text"}, {key:"lastName", label:"Last name", type:"text"},
+        {key:"phone", label:"Phone", type:"tel"}, {key:"email", label:"Email", type:"email"},
+        {key:"org", label:"Company", type:"text"}, {key:"title", label:"Job title", type:"text"},
+        {key:"website", label:"Website", type:"url"}, {key:"address", label:"Address", type:"text"},
+      ],
+      build: vcardData },
+
+    { id:"business", label:"Business", icon:ICONS.business,
+      fields:[
+        {key:"name", label:"Business name", type:"text"}, {key:"tagline", label:"One‑line description", type:"text"},
+        {key:"phone", label:"Phone", type:"tel"}, {key:"email", label:"Email", type:"email"},
+        {key:"website", label:"Website", type:"url"}, {key:"address", label:"Address", type:"text"},
+        {key:"hours", label:"Hours", type:"textarea", placeholder:"Mon–Fri 9–6, Sat 10–4"},
+      ],
+      build:function(f){
+        return textBlock([
+          f.name || "Business",
+          f.tagline,
+          f.address,
+          f.hours,
+          f.phone ? ("Phone: " + f.phone) : null,
+          f.email ? ("Email: " + f.email) : null,
+          f.website ? ensureProtocol(f.website) : null
+        ]);
+      } },
+
+    { id:"video", label:"Video", icon:ICONS.video,
+      fields:[ {key:"url", label:"Video link", type:"url", placeholder:"link to your hosted video (YouTube, Vimeo, direct file...)"} ],
+      build:function(f){ return ensureProtocol(f.url); } },
+
+    { id:"images", label:"Images", icon:ICONS.images,
+      fields:[ {key:"url", label:"Image URL", type:"url", placeholder:"link to your hosted image (jpg, png, gif...)"} ],
+      build:function(f){ return ensureProtocol(f.url); } },
+
+    { id:"facebook", label:"Facebook", icon:ICONS.facebook,
+      fields:[ {key:"url", label:"Facebook page link", type:"url", placeholder:"facebook.com/yourpage"} ],
+      build:function(f){ return ensureProtocol(f.url); } },
+
+    { id:"instagram", label:"Instagram", icon:ICONS.instagram,
+      fields:[ {key:"handle", label:"Username or link", type:"text", placeholder:"yourhandle or full profile link"} ],
+      build:function(f){ var v=f.handle||""; return /^https?:\/\//i.test(v) ? v : ("https://instagram.com/" + v.replace(/^@/,"")); } },
+
+    { id:"social", label:"Social Media", icon:ICONS.social,
+      fields:[ {key:"__list", label:"Channels", listFields:[["label","Platform"],["url","Link"]], addLabel:"Add another channel"} ],
+      build:function(f){
+        var rows=(f.__list||[]).filter(function(r){return r.url;});
+        if(rows.length === 1) return ensureProtocol(rows[0].url);
+        return textBlock(["Find us:"].concat(rows.map(function(r){ return (r.label?r.label+": ":"") + ensureProtocol(r.url); })));
+      } },
+
+    { id:"whatsapp", label:"WhatsApp", icon:ICONS.whatsapp,
+      fields:[ {key:"number", label:"Phone number (with country code)", type:"tel", placeholder:"+1 555 000 0000"}, {key:"message", label:"Pre‑filled message", type:"textarea"} ],
+      build:function(f){ return "https://wa.me/" + digitsOnly(f.number).replace("+","") + (f.message?("?text=" + encodeURIComponent(f.message)):""); } },
+
+    { id:"mp3", label:"MP3", icon:ICONS.mp3,
+      fields:[ {key:"url", label:"Audio file link", type:"url", placeholder:"link to your hosted MP3"} ],
+      build:function(f){ return ensureProtocol(f.url); } },
+
+    { id:"apps", label:"Apps", icon:ICONS.apps,
+      fields:[ {key:"ios", label:"App Store link", type:"url"}, {key:"android", label:"Google Play link", type:"url"} ],
+      build:function(f){
+        var ios = f.ios ? ensureProtocol(f.ios) : null, android = f.android ? ensureProtocol(f.android) : null;
+        if(ios && !android) return ios;
+        if(android && !ios) return android;
+        return textBlock([
+          "Get the app:",
+          ios ? ("iPhone/iPad: " + ios) : null,
+          android ? ("Android: " + android) : null
+        ]);
+      } },
+
+    { id:"menu", label:"Menu", icon:ICONS.menu,
+      fields:[ {key:"restaurant", label:"Menu title", type:"text", placeholder:"The Corner Kitchen"}, {key:"__list", label:"Items", listFields:[["name","Item"],["price","Price"]], addLabel:"Add another item"} ],
+      build:function(f){
+        var rows=(f.__list||[]).filter(function(r){return r.name;});
+        return textBlock([f.restaurant || "Menu", ""].concat(
+          rows.map(function(r){ return r.name + (r.price ? ("  —  " + r.price) : ""); })
+        ));
+      } },
+
+    { id:"coupon", label:"Coupon", icon:ICONS.coupon,
+      fields:[ {key:"offer", label:"Offer", type:"text", placeholder:"20% off your next order"}, {key:"code", label:"Code", type:"text", placeholder:"SAVE20"}, {key:"expiry", label:"Valid until", type:"text", placeholder:"Dec 31, 2026"}, {key:"terms", label:"Terms", type:"textarea"} ],
+      build:function(f){
+        return textBlock([
+          f.offer || "Special offer",
+          f.code ? ("Code: " + f.code) : null,
+          f.expiry ? ("Valid until: " + f.expiry) : null,
+          f.terms
+        ]);
+      } },
+
+    { id:"linkslist", label:"List of Links", icon:ICONS.social,
+      fields:[ {key:"heading", label:"Page title", type:"text", placeholder:"All my links"}, {key:"__list", label:"Links", listFields:[["label","Label"],["url","Link"]], addLabel:"Add another link"} ],
+      build:function(f){
+        var rows=(f.__list||[]).filter(function(r){return r.url;});
+        if(rows.length === 1) return ensureProtocol(rows[0].url);
+        return textBlock([f.heading || "My links"].concat(rows.map(function(r){ return (r.label?r.label+": ":"") + ensureProtocol(r.url); })));
+      } },
+
+    { id:"email", label:"Email", icon:ICONS.email,
+      fields:[ {key:"to", label:"To", type:"email"}, {key:"subject", label:"Subject", type:"text"}, {key:"body", label:"Body", type:"textarea"} ],
+      build:function(f){ return "mailto:" + esc(f.to) + "?subject=" + encodeURIComponent(f.subject||"") + "&body=" + encodeURIComponent(f.body||""); } },
+
+    { id:"phone", label:"Phone", icon:ICONS.phone,
+      fields:[ {key:"number", label:"Phone number", type:"tel"} ],
+      build:function(f){ return "tel:" + digitsOnly(f.number); } },
+
+    { id:"sms", label:"SMS", icon:ICONS.sms,
+      fields:[ {key:"number", label:"Phone number", type:"tel"}, {key:"message", label:"Message", type:"textarea"} ],
+      build:function(f){ return "SMSTO:" + digitsOnly(f.number) + ":" + (f.message||""); } },
+  ];
+
+  var THEMES = [
+    { id:"letterpress", label:"Letterpress", fg:"#17181A", bg:"#F7F3EA", dot:"square", corner:"square", gradient:false },
+    { id:"cobalt", label:"Cobalt Proof", fg:"#2547E0", bg:"#FFFFFF", dot:"rounded", corner:"extra-rounded", gradient:false },
+    { id:"brass", label:"Brass Plate", fg:"#8A5E22", bg:"#1E1B16", dot:"dots", corner:"dot", gradient:false },
+    { id:"mint", label:"Mint Receipt", fg:"#1E7A66", bg:"#F1FBF8", dot:"extra-rounded", corner:"extra-rounded", gradient:false },
+    { id:"signal", label:"Signal Red", fg:"#B5341F", bg:"#FFFFFF", dot:"classy", corner:"square", gradient:false },
+    { id:"night", label:"Night Run", fg:"#F7F3EA", bg:"#111214", dot:"dots", corner:"dot", gradient:false },
+    { id:"sunset", label:"Sunset Foil", fg:"#D5432B", fg2:"#B8863B", bg:"#FFF7EC", dot:"classy-rounded", corner:"extra-rounded", gradient:true },
+    { id:"chrome", label:"Chrome", fg:"#2547E0", fg2:"#7A3FD1", bg:"#FFFFFF", dot:"rounded", corner:"dot", gradient:true },
+    { id:"noir-white", label:"Noir White", fg:"#FFFFFF", bg:"#0A0A0A", dot:"rounded", corner:"extra-rounded", gradient:false },
+    { id:"noir-gold", label:"Noir Gold", fg:"#D4AF37", bg:"#0A0A0A", dot:"classy-rounded", corner:"extra-rounded", gradient:false },
+    { id:"obsidian-gold", label:"Obsidian Gold", fg:"#F5D485", fg2:"#B8860B", bg:"#000000", dot:"classy", corner:"dot", gradient:true },
+    { id:"midnight-platinum", label:"Midnight Platinum", fg:"#E8E8E8", bg:"#0D0D0D", dot:"dots", corner:"dot", gradient:false },
+    { id:"onyx-ivory", label:"Onyx Ivory", fg:"#FDF6E3", bg:"#111111", dot:"extra-rounded", corner:"square", gradient:false },
+  ];
+
+  var state = {
+    typeId: "website",
+    fields: {},
+    theme: "letterpress",
+    dotStyle: "square", cornerStyle: "square",
+    fg: "#17181A", bg: "#F7F3EA", gradient:false, fg2:"#2547E0",
+    ecc: "M", size: 720, plateNo: 1
+  };
+
+  var els = {
+    typeGrid: document.getElementById("typeGrid"),
+    formArea: document.getElementById("formArea"),
+    themeRow: document.getElementById("themeRow"),
+    qrContainer: document.getElementById("qrContainer"),
+    plateNo: document.getElementById("plateNo"),
+    plateType: document.getElementById("plateType"),
+    capFill: document.getElementById("capFill"),
+    capText: document.getElementById("capText"),
+    capPct: document.getElementById("capPct"),
+  };
+
+  var CAPACITY = { L:2953, M:2331, Q:1663, H:1273 };
+  var PAGE_BUILT_TYPES = ["business","menu","coupon","linkslist","social"];
+
+  TYPES.forEach(function(t){
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "type-btn" + (t.id===state.typeId?" active":"");
+    btn.innerHTML = t.icon + "<span>" + t.label + "</span>";
+    btn.addEventListener("click", function(){
+      state.typeId = t.id; state.fields = {};
+      state.ecc = PAGE_BUILT_TYPES.indexOf(t.id) !== -1 ? "L" : "M";
+      document.getElementById("eccLevel").value = state.ecc;
+      document.querySelectorAll(".type-btn").forEach(function(b){ b.classList.remove("active"); });
+      btn.classList.add("active");
+      bumpPlateNumber();
+      renderForm(); generate();
+    });
+    els.typeGrid.appendChild(btn);
+  });
+
+  THEMES.forEach(function(th){
+    var el = document.createElement("div");
+    el.className = "theme-swatch" + (th.id===state.theme?" active":"");
+    var dotStyleBg = th.gradient ? ("linear-gradient(135deg," + th.fg + "," + th.fg2 + ")") : th.fg;
+    el.innerHTML = '<div class="dot" style="background:' + dotStyleBg + ';"></div>' + th.label;
+    el.addEventListener("click", function(){
+      state.theme = th.id;
+      state.fg = th.fg; state.bg = th.bg; state.dotStyle = th.dot; state.cornerStyle = th.corner;
+      state.gradient = !!th.gradient; state.fg2 = th.fg2 || state.fg2;
+      syncControlsFromState();
+      document.querySelectorAll(".theme-swatch").forEach(function(s){ s.classList.remove("active"); });
+      el.classList.add("active");
+      generate();
+    });
+    els.themeRow.appendChild(el);
+  });
+
+  function syncControlsFromState(){
+    document.getElementById("dotStyle").value = state.dotStyle;
+    document.getElementById("cornerStyle").value = state.cornerStyle;
+    document.getElementById("fgColor").value = state.fg; document.getElementById("fgHex").textContent = state.fg;
+    document.getElementById("bgColor").value = state.bg; document.getElementById("bgHex").textContent = state.bg;
+    document.getElementById("gradientToggle").checked = state.gradient;
+    document.getElementById("gradientColorWrap").style.display = state.gradient ? "block" : "none";
+    document.getElementById("fgColor2").value = state.fg2; document.getElementById("fgHex2").textContent = state.fg2;
+  }
+
+  function fieldHtml(f){
+    if(f.type === "textarea"){
+      return '<div class="field" data-key="'+f.key+'"><label>'+attrEsc(f.label)+'</label><textarea data-k="'+f.key+'" placeholder="'+attrEsc(f.placeholder||"")+'">'+attrEsc(state.fields[f.key]||"")+'</textarea></div>';
+    }
+    if(f.type === "select"){
+      var opts = f.options.map(function(o){ return '<option value="'+o[0]+'"'+(state.fields[f.key]===o[0]?" selected":"")+'>'+o[1]+'</option>'; }).join("");
+      return '<div class="field" data-key="'+f.key+'"><label>'+attrEsc(f.label)+'</label><select data-k="'+f.key+'">'+opts+'</select></div>';
+    }
+    return '<div class="field" data-key="'+f.key+'"><label>'+attrEsc(f.label)+'</label><input type="'+(f.type||"text")+'" data-k="'+f.key+'" placeholder="'+attrEsc(f.placeholder||"")+'" value="'+attrEsc(state.fields[f.key]||"")+'"></div>';
+  }
+
+  function renderForm(){
+    var type = TYPES.filter(function(t){ return t.id===state.typeId; })[0];
+    els.plateType.textContent = type.label.toUpperCase();
+    var html = "";
+    type.fields.forEach(function(f){
+      if(f.key === "__list"){
+        if(!state.fields.__list) state.fields.__list = [{}];
+        html += '<div class="field"><label>'+attrEsc(f.label)+'</label><div class="list-rows" id="listRows"></div>'
+          + '<button type="button" class="add-row" id="addRowBtn" style="margin-top:8px;">+ '+attrEsc(f.addLabel||"Add row")+'</button></div>';
+      } else {
+        html += fieldHtml(f);
+      }
+    });
+    els.formArea.innerHTML = html;
+
+    els.formArea.querySelectorAll("[data-k]").forEach(function(inp){
+      inp.addEventListener("input", function(){ state.fields[inp.getAttribute("data-k")] = inp.value; generate(); });
+    });
+
+    var listField = type.fields.filter(function(f){ return f.key==="__list"; })[0];
+    if(listField){
+      var container = document.getElementById("listRows");
+      function drawRows(){
+        container.innerHTML = "";
+        state.fields.__list.forEach(function(row, idx){
+          var rowEl = document.createElement("div");
+          rowEl.className = "list-row";
+          var inner = listField.listFields.map(function(lf){
+            var key = lf[0], label = lf[1];
+            return '<div class="field"><input type="text" data-idx="'+idx+'" data-lk="'+key+'" placeholder="'+attrEsc(label)+'" value="'+attrEsc(row[key]||"")+'"></div>';
+          }).join("");
+          rowEl.innerHTML = inner + '<button type="button" class="row-remove" data-remove="'+idx+'">&times;</button>';
+          container.appendChild(rowEl);
+        });
+        container.querySelectorAll("[data-lk]").forEach(function(inp){
+          inp.addEventListener("input", function(){
+            var idx = +inp.getAttribute("data-idx"), key = inp.getAttribute("data-lk");
+            state.fields.__list[idx][key] = inp.value;
+            generate();
+          });
+        });
+        container.querySelectorAll("[data-remove]").forEach(function(btn){
+          btn.addEventListener("click", function(){
+            var idx = +btn.getAttribute("data-remove");
+            state.fields.__list.splice(idx,1);
+            if(state.fields.__list.length===0) state.fields.__list.push({});
+            drawRows(); generate();
+          });
+        });
+      }
+      drawRows();
+      document.getElementById("addRowBtn").addEventListener("click", function(){
+        state.fields.__list.push({});
+        drawRows();
+      });
+    }
+  }
+
+  document.getElementById("dotStyle").addEventListener("change", function(e){ state.dotStyle = e.target.value; generate(); });
+  document.getElementById("cornerStyle").addEventListener("change", function(e){ state.cornerStyle = e.target.value; generate(); });
+  document.getElementById("fgColor").addEventListener("input", function(e){ state.fg = e.target.value; document.getElementById("fgHex").textContent = state.fg; generate(); });
+  document.getElementById("bgColor").addEventListener("input", function(e){ state.bg = e.target.value; document.getElementById("bgHex").textContent = state.bg; generate(); });
+  document.getElementById("fgColor2").addEventListener("input", function(e){ state.fg2 = e.target.value; document.getElementById("fgHex2").textContent = state.fg2; generate(); });
+  document.getElementById("gradientToggle").addEventListener("change", function(e){
+    state.gradient = e.target.checked;
+    document.getElementById("gradientColorWrap").style.display = state.gradient ? "block" : "none";
+    generate();
+  });
+  document.getElementById("eccLevel").addEventListener("change", function(e){ state.ecc = e.target.value; generate(); });
+  document.getElementById("sizeSlider").addEventListener("input", function(e){
+    state.size = +e.target.value; document.getElementById("sizeVal").textContent = state.size; generate();
+  });
+
+  var qrInstance = null;
+  var libReady = false;
+  function currentData(){
+    var type = TYPES.filter(function(t){ return t.id===state.typeId; })[0];
+    try{ return type.build(state.fields) || ""; }catch(e){ return ""; }
+  }
+
+  function updateCapacityMeter(dataStr){
+    var bytes = utf8ByteLength(dataStr);
+    var max = CAPACITY[state.ecc] || CAPACITY.M;
+    var pct = Math.min(100, Math.round((bytes/max)*100));
+    els.capFill.style.width = pct + "%";
+    els.capFill.style.background = pct > 92 ? "var(--signal)" : (pct > 65 ? "var(--brass)" : "var(--mint)");
+    els.capText.textContent = bytes + " / " + max + " bytes";
+    els.capPct.textContent = pct + "%";
+    return bytes <= max;
+  }
+
+  function generate(){
+    var data = currentData();
+    var fits = updateCapacityMeter(data);
+    if(!data){
+      els.qrContainer.innerHTML = '<div class="qr-empty">Fill in the form to cut your first plate.</div>';
+      return;
+    }
+    if(!libReady || typeof QRCodeStyling === "undefined"){
+      els.qrContainer.innerHTML = '<div class="qr-empty">Loading the styling engine…</div>';
+      return;
+    }
+    if(!fits){
+      els.qrContainer.innerHTML = '<div class="qr-empty">That\'s too much data for one code at this error‑correction level. Trim the content or drop to level L.</div>';
+      return;
+    }
+
+    var dotsOptions = { type: state.dotStyle };
+    if(state.gradient){
+      dotsOptions.gradient = { type:"linear", rotation: Math.PI/4, colorStops:[{offset:0,color:state.fg},{offset:1,color:state.fg2}] };
+    } else {
+      dotsOptions.color = state.fg;
+    }
+
+    var opts = {
+      width: state.size, height: state.size,
+      type: "svg",
+      data: data,
+      margin: 8,
+      qrOptions: { errorCorrectionLevel: state.ecc },
+      dotsOptions: dotsOptions,
+      backgroundOptions: { color: state.bg },
+      cornersSquareOptions: { type: state.cornerStyle === "dot" ? "dot" : state.cornerStyle, color: state.gradient ? state.fg2 : state.fg },
+      cornersDotOptions: { type: state.cornerStyle === "square" ? "square" : "dot", color: state.fg },
+    };
+
+    try{
+      qrInstance = new QRCodeStyling(opts);
+      els.qrContainer.innerHTML = "";
+      qrInstance.append(els.qrContainer);
+      requestAnimationFrame(function(){
+        var rendered = els.qrContainer.querySelector("canvas, svg");
+        if(rendered) rendered.classList.add("qr-pop");
+      });
+    }catch(err){
+      els.qrContainer.innerHTML = '<div class="qr-empty">Could not render this code — try shortening the content.</div>';
+    }
+  }
+
+  var plateCounter = 1;
+  var lastTypeForCounter = "website";
+  function bumpPlateNumber(){
+    if(state.typeId !== lastTypeForCounter){
+      plateCounter++;
+      lastTypeForCounter = state.typeId;
+      els.plateNo.textContent = "PLATE NO. " + String(plateCounter).padStart(6,"0");
+    }
+  }
+
+  function download(ext){
+    if(!qrInstance) return;
+    qrInstance.download({ name: "qravixo-qr", extension: ext });
+  }
+  document.getElementById("dlPng").addEventListener("click", function(){ download("png"); });
+  document.getElementById("dlSvg").addEventListener("click", function(){ download("svg"); });
+  document.getElementById("dlJpg").addEventListener("click", function(){ download("jpeg"); });
+
+  function init(){
+    syncControlsFromState();
+    renderForm();
+    state.fields.url = "yourbrand.com";
+    document.querySelectorAll('[data-k="url"]').forEach(function(i){ i.value = "yourbrand.com"; });
+    els.plateNo.textContent = "PLATE NO. 000001";
+    els.plateType.textContent = "WEBSITE";
+    generate();
+  }
+
+  window.addEventListener("load", function(){
+    var tries = 0;
+    (function waitForLib(){
+      if(typeof QRCodeStyling !== "undefined"){ libReady = true; init(); return; }
+      tries++;
+      if(tries > 60){ els.qrContainer.innerHTML = '<div class="qr-empty">The styling engine failed to load. Check your connection and reload.</div>'; return; }
+      setTimeout(waitForLib, 100);
+    })();
+  });
+
+})();
+</script>
+</body>
+</html>
