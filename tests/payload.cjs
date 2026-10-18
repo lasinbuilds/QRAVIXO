@@ -1,0 +1,33 @@
+const fs = require('node:fs');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const source = fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const helpers = source.slice(source.indexOf('  function esc('),source.indexOf('  var ICONS'));
+const vcard = source.slice(source.indexOf('  function vcardData('),source.indexOf('  var TYPES'));
+const context = vm.createContext({URL, Blob});
+vm.runInContext(helpers + vcard, context);
+assert.equal(context.ensureProtocol(' example.com '),'https://example.com/');
+for (const input of ['javascript:alert(1)','data:text/html,test','mailto:a@b.com','https://user:secret@example.com']) {
+  assert.throws(() => context.ensureProtocol(input));
+}
+assert.equal(context.buildLinkList([{url:'example.com'}],'Links'),'https://example.com/');
+assert.equal(context.buildLinkList([], 'Links'),'');
+assert.equal(context.buildLinkList([{url:'a.com',label:'A'},{url:'b.com'}],'Links'),'Links\nA: https://a.com/\nhttps://b.com/');
+assert.equal(context.vcardEscape('a;b,c\nd\\e'),'a\\;b\\,c\\nd\\\\e');
+assert(context.vcardData({firstName:'A\nTEL:injected'}).includes('A\\nTEL:injected'));
+assert.equal(context.attrEsc('"><script>'),'&quot;&gt;&lt;script&gt;');
+const events = {};
+const requests = [];
+const monitoring = fs.readFileSync(path.join(__dirname,'../monitoring.js'),'utf8').replace('var endpoint = ""','var endpoint = "https://collector.example/events"');
+const env = vm.createContext({URL,window:{addEventListener:(name,fn)=>events[name]=fn},console:{error(){},warn(){}},fetch:(...args)=>{requests.push(args);return Promise.resolve({ok:true});}});
+vm.runInContext(monitoring, env);
+env.window.QravixoMonitoring.report('render');
+env.window.QravixoMonitoring.report('render');
+env.window.QravixoMonitoring.report('arbitrary-private-payload');
+events.error({message:'password-secret',filename:'private-url'});
+assert.equal(requests.length,2);
+assert.deepEqual(JSON.parse(requests[0][1].body),{app:'qravixo',operation:'render',release:'handoff-1'});
+assert(!JSON.stringify(requests).includes('password-secret'));
+assert.equal(requests[0][1].credentials,'omit');
+console.log('PASS: URL validation, list builders, vCard/HTML escaping, telemetry privacy and deduplication');
