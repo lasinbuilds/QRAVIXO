@@ -4,7 +4,17 @@
  <meta name="google-site-verification" content="nUGGAlhrWMWwVLlAVu60yo_E3LlHyh2QOvGupQYO5Ec" /> 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Qravixo — QR Code Studio</title>
+<title>QRAVIXO — Free QR Code Generator</title>
+<meta name="description" content="QRAVIXO is a free QR code generator for websites, Wi-Fi, text, contacts, social media, menus, coupons, and more. Create and download custom QR codes.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://qravixo.netlify.app/">
+<meta property="og:title" content="QRAVIXO — Free QR Code Generator">
+<meta property="og:description" content="Create and download custom QR codes for websites, Wi-Fi, text, contacts, social media, menus, coupons, and more.">
+<meta property="og:url" content="https://qravixo.netlify.app/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="QRAVIXO — Free QR Code Generator">
+<meta name="twitter:description" content="Create and download custom QR codes for websites, Wi-Fi, text, contacts, social media, menus, coupons, and more.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -51,6 +61,7 @@
   .wordmark .mark i{ background:var(--ink); border-radius:1px; }
   .wordmark .mark i:nth-child(2),.wordmark .mark i:nth-child(4),.wordmark .mark i:nth-child(6),.wordmark .mark i:nth-child(8){ background:transparent; }
   .tagline{ font-size:13px; color:var(--ink-soft); margin-top:4px; font-family:'IBM Plex Mono',monospace; }
+  .seo-heading{ font-family:'Space Grotesk',sans-serif; font-size:22px; line-height:1.2; margin:14px 0 0; letter-spacing:-.02em; }
   .badges{ display:flex; gap:8px; flex-wrap:wrap; }
   .badge{
     font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.02em;
@@ -70,6 +81,7 @@
     color:var(--ink-soft); margin-bottom:14px; display:flex; align-items:center; gap:8px;
   }
   .eyebrow::after{ content:''; flex:1; height:1px; background:var(--line); }
+  .panel-heading{ font-family:'Space Grotesk',sans-serif; font-size:20px; line-height:1.25; margin:0 0 16px; letter-spacing:-.02em; }
 
   .type-grid{
     display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:18px;
@@ -89,6 +101,8 @@
   .form-area{ display:flex; flex-direction:column; gap:12px; }
   .field label{ display:block; font-size:11.5px; font-weight:600; margin-bottom:5px; color:var(--ink); }
   .field .hint{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
+  .field input[aria-invalid="true"], .field textarea[aria-invalid="true"]{ border-color:var(--signal); }
+  .field input:invalid, .field textarea:invalid{ box-shadow:none; }
   .field input[type=text], .field input[type=url], .field input[type=tel], .field input[type=email],
   .field input[type=password], .field textarea, .field select{
     width:100%; border:1.3px solid var(--line); border-radius:7px; padding:9px 10px; font-size:13.5px;
@@ -111,6 +125,7 @@
     font-family:'IBM Plex Mono',monospace; font-size:11.5px; cursor:pointer; color:var(--ink-soft);
   }
   .add-row:hover{ color:var(--ink); border-color:var(--ink); }
+  .add-row:disabled{ cursor:not-allowed; opacity:.55; }
 
   .proof-frame{
     position:relative; border:1.3px solid var(--ink); border-radius:8px; background:
@@ -179,6 +194,7 @@
   }
   .dl-btn.ghost{ background:transparent; color:var(--ink); }
   .dl-btn:hover{ opacity:.85; }
+  .dl-btn:disabled{ cursor:not-allowed; opacity:.45; }
 
   footer.small-print{
     margin-top:26px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-soft);
@@ -192,6 +208,7 @@
   <header class="top">
     <div>
       <div class="wordmark"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>QRAVIXO</div>
+      <h1 class="seo-heading">Free Custom QR Code Generator</h1>
       <div class="tagline">Unlimited QR codes, cut to your own plate — no account, no scan caps, no watermark.</div>
     </div>
     <div class="badges">
@@ -203,6 +220,7 @@
 
   <main class="grid">
     <section class="panel">
+      <h2 class="panel-heading">Create a QR Code for Websites, Wi-Fi &amp; More</h2>
       <div class="eyebrow">01 — Choose a format</div>
       <div class="type-grid" id="typeGrid"></div>
       <div class="form-area" id="formArea"></div>
@@ -280,9 +298,9 @@
       </details>
 
       <div class="download-row">
-        <button class="dl-btn" id="dlPng">Download PNG</button>
-        <button class="dl-btn ghost" id="dlSvg">Download SVG</button>
-        <button class="dl-btn ghost" id="dlJpg">Download JPG</button>
+        <button class="dl-btn" id="dlPng" disabled>Download PNG</button>
+        <button class="dl-btn ghost" id="dlSvg" disabled>Download SVG</button>
+        <button class="dl-btn ghost" id="dlJpg" disabled>Download JPG</button>
       </div>
     </section>
   </main>
@@ -295,7 +313,9 @@
 </footer>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js"
+        integrity="sha384-P7sw4KeI1SDhOs6wYFsBysIIHFqMTgG4y9vunEfL8ZuV0WhnHsh9MRu9Rso17MtY"
+        crossorigin="anonymous"></script>
 <script>
 (function(){
   "use strict";
@@ -304,11 +324,96 @@
   function attrEsc(s){ return esc(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function utf8ByteLength(str){ return new Blob([str]).size; }
   function digitsOnly(s){ return (s||"").replace(/[^\d+]/g,"").replace(/(?!^)\+/g,""); }
-  function ensureProtocol(url){
-    if(!url) return "";
-    if(/^https?:\/\//i.test(url) || /^mailto:|^tel:|^sms:|^data:|^smsto:/i.test(url)) return url;
-    return "https://" + url;
+  var MAX_LIST_ROWS = 20;
+  var MAX_TEXT_LENGTH = 256;
+  var MAX_TEXTAREA_LENGTH = 2048;
+  var MAX_URL_LENGTH = 2048;
+  var MAX_EMAIL_LENGTH = 254;
+  var MAX_PHONE_LENGTH = 32;
+  var MAX_WIFI_SSID_LENGTH = 32;
+  var MAX_WIFI_PASSWORD_LENGTH = 128;
+  var CLIENT_DOWNLOAD_LIMIT = 100;
+  var CLIENT_DOWNLOAD_WINDOW_MS = 60 * 60 * 1000;
+
+  function normalizeHttpsUrl(raw){
+    var value = String(raw || "").trim();
+    if(!value || /^[a-z][a-z\d+.-]*:/i.test(value) && !/^https:\/\//i.test(value)) return "";
+    var candidate = /^https:\/\//i.test(value) ? value : "https://" + value;
+    try{
+      var parsed = new URL(candidate);
+      if(parsed.protocol !== "https:" || !parsed.hostname || parsed.username || parsed.password) return "";
+      return parsed.href;
+    }catch(e){ return ""; }
   }
+
+  function validEmail(value){
+    return /^[^\s@/?#%]+@[^\s@/?#%]+\.[^\s@/?#%]+$/.test(String(value || "").trim());
+  }
+
+  function validPhone(value){
+    return /^\+?\d{7,15}$/.test(String(value || "").replace(/[\s().-]/g, ""));
+  }
+
+  function fieldMaxLength(field){
+    if(field.key === "ssid") return MAX_WIFI_SSID_LENGTH;
+    if(field.key === "password") return MAX_WIFI_PASSWORD_LENGTH;
+    if(field.type === "textarea") return MAX_TEXTAREA_LENGTH;
+    if(field.type === "url") return MAX_URL_LENGTH;
+    if(field.type === "email") return MAX_EMAIL_LENGTH;
+    if(field.type === "tel") return MAX_PHONE_LENGTH;
+    return MAX_TEXT_LENGTH;
+  }
+
+  function listFieldMaxLength(key){
+    if(key === "url") return MAX_URL_LENGTH;
+    if(key === "price") return 32;
+    return 128;
+  }
+
+  function validationError(type){
+    for(var i=0;i<type.fields.length;i++){
+      var field = type.fields[i];
+      if(field.key === "__list"){
+        var rows = Array.isArray(state.fields.__list) ? state.fields.__list : [];
+        if(rows.length > MAX_LIST_ROWS) return "Please keep lists to 20 rows or fewer.";
+        for(var r=0;r<rows.length;r++){
+          var row = rows[r] || {};
+          for(var j=0;j<field.listFields.length;j++){
+            var listKey = field.listFields[j][0];
+            var listValue = String(row[listKey] || "");
+            if(listValue.length > listFieldMaxLength(listKey)) return "One of your list fields is too long.";
+            if(listKey === "url" && listValue && !normalizeHttpsUrl(listValue)) return "List links must use valid HTTPS URLs.";
+          }
+        }
+        continue;
+      }
+      var value = String(state.fields[field.key] || "");
+      if(value.length > fieldMaxLength(field)) return field.label + " is too long.";
+      if(!value) continue;
+      if(field.type === "url" && !normalizeHttpsUrl(value)) return field.label + " must be a valid HTTPS URL.";
+      if(field.type === "email" && !validEmail(value)) return field.label + " must be a valid email address.";
+      if(field.type === "tel" && !validPhone(value)) return field.label + " must contain 7–15 digits.";
+    }
+    if(type.id === "instagram" && state.fields.handle){
+      var handle = String(state.fields.handle).trim();
+      if(/^[a-z][a-z\d+.-]*:/i.test(handle) || handle.indexOf("/") !== -1){
+        if(!normalizeHttpsUrl(handle)) return "Instagram links must use HTTPS.";
+      } else if(!/^@?[A-Za-z0-9._]{1,30}$/.test(handle)) {
+        return "Enter a valid Instagram username or HTTPS profile URL.";
+      }
+    }
+    if(type.id === "wifi" && !String(state.fields.ssid || "").trim()) return "Network name (SSID) is required.";
+    if(type.id === "email" && !String(state.fields.to || "").trim()) return "Email address is required.";
+    if(["phone","sms","whatsapp"].indexOf(type.id) !== -1 && !validPhone(state.fields.number)) return "Enter a valid phone number with 7–15 digits.";
+    if(type.id === "instagram" && !String(state.fields.handle || "").trim()) return "Instagram username or link is required.";
+    if(type.id === "apps" && !String(state.fields.ios || "").trim() && !String(state.fields.android || "").trim()) return "Add at least one app store link.";
+    if(["social","menu","linkslist"].indexOf(type.id) !== -1){
+      var requiredRows = (state.fields.__list || []).filter(function(row){ return type.id === "menu" ? String(row.name || "").trim() : String(row.url || "").trim(); });
+      if(!requiredRows.length) return "Add at least one item before generating a QR code.";
+    }
+    return "";
+  }
+
   function textBlock(lines){
     return lines.filter(function(l){ return l !== null && l !== undefined && l !== ""; }).join("\n");
   }
@@ -337,15 +442,15 @@
   function vcardData(f){
     return "BEGIN:VCARD\nVERSION:3.0\nN:" + esc(f.lastName) + ";" + esc(f.firstName) + "\nFN:" + esc(f.firstName) + " " + esc(f.lastName)
       + (f.org?("\nORG:" + esc(f.org)):"") + (f.title?("\nTITLE:" + esc(f.title)):"")
-      + (f.phone?("\nTEL;TYPE=CELL:" + esc(f.phone)):"") + (f.email?("\nEMAIL:" + esc(f.email)):"")
-      + (f.website?("\nURL:" + ensureProtocol(f.website)):"") + (f.address?("\nADR;TYPE=WORK:;;" + esc(f.address).replace(/,/g,";")):"")
+      + (f.phone?("\nTEL;TYPE=CELL:" + esc(String(f.phone).trim())):"") + (f.email?("\nEMAIL:" + esc(String(f.email).trim())):"")
+      + (f.website?("\nURL:" + normalizeHttpsUrl(f.website)):"") + (f.address?("\nADR;TYPE=WORK:;;" + esc(f.address).replace(/,/g,";")):"")
       + "\nEND:VCARD";
   }
 
   var TYPES = [
     { id:"website", label:"Website", icon:ICONS.website,
       fields:[ {key:"url", label:"Web address", type:"url", placeholder:"yourbrand.com/page"} ],
-      build:function(f){ return ensureProtocol(f.url); } },
+      build:function(f){ return normalizeHttpsUrl(f.url); } },
 
     { id:"text", label:"Text", icon:ICONS.text,
       fields:[ {key:"content", label:"Message", type:"textarea", placeholder:"Anything you want to show when this is scanned."} ],
@@ -354,7 +459,7 @@
     { id:"wifi", label:"WiFi", icon:ICONS.wifi,
       fields:[
         {key:"ssid", label:"Network name (SSID)", type:"text", placeholder:"Studio-Guest"},
-        {key:"password", label:"Password", type:"text", placeholder:"leave blank if open"},
+        {key:"password", label:"Password (included in QR)", type:"password", autocomplete:"new-password", placeholder:"leave blank if open"},
         {key:"encryption", label:"Security", type:"select", options:[["WPA","WPA / WPA2"],["WEP","WEP"],["nopass","None — open network"]]},
       ],
       build:function(f){
@@ -385,34 +490,39 @@
           f.tagline,
           f.address,
           f.hours,
-          f.phone ? ("Phone: " + f.phone) : null,
-          f.email ? ("Email: " + f.email) : null,
-          f.website ? ensureProtocol(f.website) : null
+          f.phone ? ("Phone: " + String(f.phone).trim()) : null,
+          f.email ? ("Email: " + String(f.email).trim()) : null,
+          f.website ? normalizeHttpsUrl(f.website) : null
         ]);
       } },
 
     { id:"video", label:"Video", icon:ICONS.video,
       fields:[ {key:"url", label:"Video link", type:"url", placeholder:"link to your hosted video (YouTube, Vimeo, direct file...)"} ],
-      build:function(f){ return ensureProtocol(f.url); } },
+      build:function(f){ return normalizeHttpsUrl(f.url); } },
 
     { id:"images", label:"Images", icon:ICONS.images,
       fields:[ {key:"url", label:"Image URL", type:"url", placeholder:"link to your hosted image (jpg, png, gif...)"} ],
-      build:function(f){ return ensureProtocol(f.url); } },
+      build:function(f){ return normalizeHttpsUrl(f.url); } },
 
     { id:"facebook", label:"Facebook", icon:ICONS.facebook,
       fields:[ {key:"url", label:"Facebook page link", type:"url", placeholder:"facebook.com/yourpage"} ],
-      build:function(f){ return ensureProtocol(f.url); } },
+      build:function(f){ return normalizeHttpsUrl(f.url); } },
 
     { id:"instagram", label:"Instagram", icon:ICONS.instagram,
       fields:[ {key:"handle", label:"Username or link", type:"text", placeholder:"yourhandle or full profile link"} ],
-      build:function(f){ var v=f.handle||""; return /^https?:\/\//i.test(v) ? v : ("https://instagram.com/" + v.replace(/^@/,"")); } },
+      build:function(f){
+        var v=String(f.handle||"").trim();
+        if(!v) return "";
+        if(/^[a-z][a-z\d+.-]*:/i.test(v) || v.indexOf("/") !== -1) return normalizeHttpsUrl(v);
+        return "https://instagram.com/" + encodeURIComponent(v.replace(/^@/,""));
+      } },
 
     { id:"social", label:"Social Media", icon:ICONS.social,
       fields:[ {key:"__list", label:"Channels", listFields:[["label","Platform"],["url","Link"]], addLabel:"Add another channel"} ],
       build:function(f){
         var rows=(f.__list||[]).filter(function(r){return r.url;});
-        if(rows.length === 1) return ensureProtocol(rows[0].url);
-        return textBlock(["Find us:"].concat(rows.map(function(r){ return (r.label?r.label+": ":"") + ensureProtocol(r.url); })));
+        if(rows.length === 1) return normalizeHttpsUrl(rows[0].url);
+        return textBlock(["Find us:"].concat(rows.map(function(r){ return (r.label?r.label+": ":"") + normalizeHttpsUrl(r.url); })));
       } },
 
     { id:"whatsapp", label:"WhatsApp", icon:ICONS.whatsapp,
@@ -421,12 +531,12 @@
 
     { id:"mp3", label:"MP3", icon:ICONS.mp3,
       fields:[ {key:"url", label:"Audio file link", type:"url", placeholder:"link to your hosted MP3"} ],
-      build:function(f){ return ensureProtocol(f.url); } },
+      build:function(f){ return normalizeHttpsUrl(f.url); } },
 
     { id:"apps", label:"Apps", icon:ICONS.apps,
       fields:[ {key:"ios", label:"App Store link", type:"url"}, {key:"android", label:"Google Play link", type:"url"} ],
       build:function(f){
-        var ios = f.ios ? ensureProtocol(f.ios) : null, android = f.android ? ensureProtocol(f.android) : null;
+        var ios = f.ios ? normalizeHttpsUrl(f.ios) : null, android = f.android ? normalizeHttpsUrl(f.android) : null;
         if(ios && !android) return ios;
         if(android && !ios) return android;
         return textBlock([
@@ -460,13 +570,13 @@
       fields:[ {key:"heading", label:"Page title", type:"text", placeholder:"All my links"}, {key:"__list", label:"Links", listFields:[["label","Label"],["url","Link"]], addLabel:"Add another link"} ],
       build:function(f){
         var rows=(f.__list||[]).filter(function(r){return r.url;});
-        if(rows.length === 1) return ensureProtocol(rows[0].url);
-        return textBlock([f.heading || "My links"].concat(rows.map(function(r){ return (r.label?r.label+": ":"") + ensureProtocol(r.url); })));
+        if(rows.length === 1) return normalizeHttpsUrl(rows[0].url);
+        return textBlock([f.heading || "My links"].concat(rows.map(function(r){ return (r.label?r.label+": ":"") + normalizeHttpsUrl(r.url); })));
       } },
 
     { id:"email", label:"Email", icon:ICONS.email,
       fields:[ {key:"to", label:"To", type:"email"}, {key:"subject", label:"Subject", type:"text"}, {key:"body", label:"Body", type:"textarea"} ],
-      build:function(f){ return "mailto:" + esc(f.to) + "?subject=" + encodeURIComponent(f.subject||"") + "&body=" + encodeURIComponent(f.body||""); } },
+      build:function(f){ return "mailto:" + String(f.to || "").trim() + "?subject=" + encodeURIComponent(f.subject||"") + "&body=" + encodeURIComponent(f.body||""); } },
 
     { id:"phone", label:"Phone", icon:ICONS.phone,
       fields:[ {key:"number", label:"Phone number", type:"tel"} ],
@@ -512,6 +622,7 @@
     capFill: document.getElementById("capFill"),
     capText: document.getElementById("capText"),
     capPct: document.getElementById("capPct"),
+    downloadButtons: [document.getElementById("dlPng"), document.getElementById("dlSvg"), document.getElementById("dlJpg")],
   };
 
   var CAPACITY = { L:2953, M:2331, Q:1663, H:1273 };
@@ -528,7 +639,7 @@
       document.querySelectorAll(".type-btn").forEach(function(b){ b.classList.remove("active"); });
       btn.classList.add("active");
       bumpPlateNumber();
-      renderForm(); generate();
+      renderForm(); scheduleGenerate();
     });
     els.typeGrid.appendChild(btn);
   });
@@ -545,7 +656,7 @@
       syncControlsFromState();
       document.querySelectorAll(".theme-swatch").forEach(function(s){ s.classList.remove("active"); });
       el.classList.add("active");
-      generate();
+      scheduleGenerate();
     });
     els.themeRow.appendChild(el);
   });
@@ -561,14 +672,27 @@
   }
 
   function fieldHtml(f){
+    var maxLength = fieldMaxLength(f);
+    var commonAttrs = ' maxlength="'+maxLength+'"' + (f.autocomplete ? ' autocomplete="'+attrEsc(f.autocomplete)+'"' : '');
     if(f.type === "textarea"){
-      return '<div class="field" data-key="'+f.key+'"><label>'+attrEsc(f.label)+'</label><textarea data-k="'+f.key+'" placeholder="'+attrEsc(f.placeholder||"")+'">'+attrEsc(state.fields[f.key]||"")+'</textarea></div>';
+      return '<div class="field" data-key="'+f.key+'"><label>'+attrEsc(f.label)+'</label><textarea data-k="'+f.key+'"'+commonAttrs+' placeholder="'+attrEsc(f.placeholder||"")+'">'+attrEsc(state.fields[f.key]||"")+'</textarea></div>';
     }
     if(f.type === "select"){
       var opts = f.options.map(function(o){ return '<option value="'+o[0]+'"'+(state.fields[f.key]===o[0]?" selected":"")+'>'+o[1]+'</option>'; }).join("");
       return '<div class="field" data-key="'+f.key+'"><label>'+attrEsc(f.label)+'</label><select data-k="'+f.key+'">'+opts+'</select></div>';
     }
-    return '<div class="field" data-key="'+f.key+'"><label>'+attrEsc(f.label)+'</label><input type="'+(f.type||"text")+'" data-k="'+f.key+'" placeholder="'+attrEsc(f.placeholder||"")+'" value="'+attrEsc(state.fields[f.key]||"")+'"></div>';
+    return '<div class="field" data-key="'+f.key+'"><label>'+attrEsc(f.label)+'</label><input type="'+(f.type||"text")+'" data-k="'+f.key+'"'+commonAttrs+' placeholder="'+attrEsc(f.placeholder||"")+'" value="'+attrEsc(state.fields[f.key]||"")+'"></div>';
+  }
+
+  function markInputValidity(input){
+    var value = String(input.value || "").trim();
+    var key = input.getAttribute("data-k") || input.getAttribute("data-lk") || "";
+    var max = input.getAttribute("maxlength") ? +input.getAttribute("maxlength") : MAX_TEXT_LENGTH;
+    var invalid = value.length > max;
+    if(!invalid && input.type === "url" && value) invalid = !normalizeHttpsUrl(value);
+    if(!invalid && input.type === "email" && value) invalid = !validEmail(value);
+    if(!invalid && key === "url" && value) invalid = !normalizeHttpsUrl(value);
+    input.setAttribute("aria-invalid", invalid ? "true" : "false");
   }
 
   function renderForm(){
@@ -587,29 +711,33 @@
     els.formArea.innerHTML = html;
 
     els.formArea.querySelectorAll("[data-k]").forEach(function(inp){
-      inp.addEventListener("input", function(){ state.fields[inp.getAttribute("data-k")] = inp.value; generate(); });
+      markInputValidity(inp);
+      inp.addEventListener("input", function(){ markInputValidity(inp); state.fields[inp.getAttribute("data-k")] = inp.value; scheduleGenerate(); });
     });
 
     var listField = type.fields.filter(function(f){ return f.key==="__list"; })[0];
     if(listField){
       var container = document.getElementById("listRows");
       function drawRows(){
+        state.fields.__list = (state.fields.__list || []).slice(0, MAX_LIST_ROWS);
         container.innerHTML = "";
         state.fields.__list.forEach(function(row, idx){
           var rowEl = document.createElement("div");
           rowEl.className = "list-row";
           var inner = listField.listFields.map(function(lf){
             var key = lf[0], label = lf[1];
-            return '<div class="field"><input type="text" data-idx="'+idx+'" data-lk="'+key+'" placeholder="'+attrEsc(label)+'" value="'+attrEsc(row[key]||"")+'"></div>';
+            return '<div class="field"><input type="text" maxlength="'+listFieldMaxLength(key)+'" data-idx="'+idx+'" data-lk="'+key+'" placeholder="'+attrEsc(label)+'" value="'+attrEsc(row[key]||"")+'"></div>';
           }).join("");
           rowEl.innerHTML = inner + '<button type="button" class="row-remove" data-remove="'+idx+'">&times;</button>';
           container.appendChild(rowEl);
         });
         container.querySelectorAll("[data-lk]").forEach(function(inp){
+          markInputValidity(inp);
           inp.addEventListener("input", function(){
             var idx = +inp.getAttribute("data-idx"), key = inp.getAttribute("data-lk");
+            markInputValidity(inp);
             state.fields.__list[idx][key] = inp.value;
-            generate();
+            scheduleGenerate();
           });
         });
         container.querySelectorAll("[data-remove]").forEach(function(btn){
@@ -617,37 +745,75 @@
             var idx = +btn.getAttribute("data-remove");
             state.fields.__list.splice(idx,1);
             if(state.fields.__list.length===0) state.fields.__list.push({});
-            drawRows(); generate();
+            drawRows(); syncAddRowButton(); scheduleGenerate();
           });
         });
       }
       drawRows();
-      document.getElementById("addRowBtn").addEventListener("click", function(){
+      var addRowButton = document.getElementById("addRowBtn");
+      function syncAddRowButton(){
+        addRowButton.disabled = state.fields.__list.length >= MAX_LIST_ROWS;
+        addRowButton.textContent = addRowButton.disabled ? "Maximum 20 rows" : "+ " + (listField.addLabel || "Add row");
+      }
+      syncAddRowButton();
+      addRowButton.addEventListener("click", function(){
+        if(state.fields.__list.length >= MAX_LIST_ROWS) return;
         state.fields.__list.push({});
         drawRows();
+        syncAddRowButton();
       });
     }
   }
 
-  document.getElementById("dotStyle").addEventListener("change", function(e){ state.dotStyle = e.target.value; generate(); });
-  document.getElementById("cornerStyle").addEventListener("change", function(e){ state.cornerStyle = e.target.value; generate(); });
-  document.getElementById("fgColor").addEventListener("input", function(e){ state.fg = e.target.value; document.getElementById("fgHex").textContent = state.fg; generate(); });
-  document.getElementById("bgColor").addEventListener("input", function(e){ state.bg = e.target.value; document.getElementById("bgHex").textContent = state.bg; generate(); });
-  document.getElementById("fgColor2").addEventListener("input", function(e){ state.fg2 = e.target.value; document.getElementById("fgHex2").textContent = state.fg2; generate(); });
+  document.getElementById("dotStyle").addEventListener("change", function(e){ state.dotStyle = e.target.value; scheduleGenerate(); });
+  document.getElementById("cornerStyle").addEventListener("change", function(e){ state.cornerStyle = e.target.value; scheduleGenerate(); });
+  document.getElementById("fgColor").addEventListener("input", function(e){ state.fg = e.target.value; document.getElementById("fgHex").textContent = state.fg; scheduleGenerate(); });
+  document.getElementById("bgColor").addEventListener("input", function(e){ state.bg = e.target.value; document.getElementById("bgHex").textContent = state.bg; scheduleGenerate(); });
+  document.getElementById("fgColor2").addEventListener("input", function(e){ state.fg2 = e.target.value; document.getElementById("fgHex2").textContent = state.fg2; scheduleGenerate(); });
   document.getElementById("gradientToggle").addEventListener("change", function(e){
     state.gradient = e.target.checked;
     document.getElementById("gradientColorWrap").style.display = state.gradient ? "block" : "none";
-    generate();
+    scheduleGenerate();
   });
-  document.getElementById("eccLevel").addEventListener("change", function(e){ state.ecc = e.target.value; generate(); });
+  document.getElementById("eccLevel").addEventListener("change", function(e){ state.ecc = e.target.value; scheduleGenerate(); });
   document.getElementById("sizeSlider").addEventListener("input", function(e){
-    state.size = +e.target.value; document.getElementById("sizeVal").textContent = state.size; generate();
+    state.size = +e.target.value; document.getElementById("sizeVal").textContent = state.size; scheduleGenerate();
   });
 
   var qrInstance = null;
   var libReady = false;
+  var generateTimer = null;
+  var lastValidationError = "";
+
+  function setDownloadEnabled(enabled){
+    els.downloadButtons.forEach(function(button){
+      button.disabled = !enabled;
+      button.setAttribute("aria-disabled", enabled ? "false" : "true");
+    });
+  }
+
+  function scheduleGenerate(){
+    clearTimeout(generateTimer);
+    qrInstance = null;
+    setDownloadEnabled(false);
+    generateTimer = setTimeout(function(){
+      generateTimer = null;
+      generate();
+    }, 120);
+  }
+
+  function showQrMessage(message){
+    els.qrContainer.textContent = "";
+    var messageEl = document.createElement("div");
+    messageEl.className = "qr-empty";
+    messageEl.textContent = message;
+    els.qrContainer.appendChild(messageEl);
+  }
+
   function currentData(){
     var type = TYPES.filter(function(t){ return t.id===state.typeId; })[0];
+    lastValidationError = validationError(type);
+    if(lastValidationError) return "";
     try{ return type.build(state.fields) || ""; }catch(e){ return ""; }
   }
 
@@ -663,18 +829,24 @@
   }
 
   function generate(){
+    qrInstance = null;
+    setDownloadEnabled(false);
     var data = currentData();
     var fits = updateCapacityMeter(data);
+    if(lastValidationError){
+      showQrMessage(lastValidationError);
+      return;
+    }
     if(!data){
-      els.qrContainer.innerHTML = '<div class="qr-empty">Fill in the form to cut your first plate.</div>';
+      showQrMessage("Fill in the form to cut your first plate.");
       return;
     }
     if(!libReady || typeof QRCodeStyling === "undefined"){
-      els.qrContainer.innerHTML = '<div class="qr-empty">Loading the styling engine…</div>';
+      showQrMessage("Loading the styling engine…");
       return;
     }
     if(!fits){
-      els.qrContainer.innerHTML = '<div class="qr-empty">That\'s too much data for one code at this error‑correction level. Trim the content or drop to level L.</div>';
+      showQrMessage("That\'s too much data for one code at this error‑correction level. Trim the content or drop to level L.");
       return;
     }
 
@@ -701,12 +873,15 @@
       qrInstance = new QRCodeStyling(opts);
       els.qrContainer.innerHTML = "";
       qrInstance.append(els.qrContainer);
+      setDownloadEnabled(true);
       requestAnimationFrame(function(){
         var rendered = els.qrContainer.querySelector("canvas, svg");
         if(rendered) rendered.classList.add("qr-pop");
       });
     }catch(err){
-      els.qrContainer.innerHTML = '<div class="qr-empty">Could not render this code — try shortening the content.</div>';
+      qrInstance = null;
+      setDownloadEnabled(false);
+      showQrMessage("Could not render this code — try shortening the content.");
     }
   }
 
@@ -720,8 +895,27 @@
     }
   }
 
+  function consumeClientDownloadQuota(){
+    var now = Date.now();
+    try{
+      var recent = JSON.parse(localStorage.getItem("qravixo-download-window") || "[]");
+      if(!Array.isArray(recent)) recent = [];
+      recent = recent.filter(function(timestamp){ return Number.isFinite(timestamp) && now - timestamp < CLIENT_DOWNLOAD_WINDOW_MS; });
+      if(recent.length >= CLIENT_DOWNLOAD_LIMIT) return false;
+      recent.push(now);
+      localStorage.setItem("qravixo-download-window", JSON.stringify(recent));
+    }catch(e){
+      // Local-only protection is best effort; the static app has no server to enforce it.
+    }
+    return true;
+  }
+
   function download(ext){
     if(!qrInstance) return;
+    if(!consumeClientDownloadQuota()){
+      showQrMessage("This browser has reached the local safety limit of 100 downloads per hour.");
+      return;
+    }
     qrInstance.download({ name: "qravixo-qr", extension: ext });
   }
   document.getElementById("dlPng").addEventListener("click", function(){ download("png"); });
